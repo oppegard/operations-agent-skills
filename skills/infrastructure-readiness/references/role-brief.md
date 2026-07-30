@@ -27,8 +27,12 @@ operational configuration.
 
 Every finding must:
 
-1. Cite `file_path:line_number` and quote or precisely identify the exact code,
-   manifest, pipeline step, or config line involved.
+1. Cite the exact artifact location required by the Engagement contract and
+   quote or precisely identify the evidence. At the Design seam, cite the
+   candidate design section and quote the exact text involved. At the Release
+   seam, cite `file_path:line_number` and identify the exact code, manifest,
+   pipeline step, or config line involved. For a Direct engagement, use the
+   corresponding exact file location or supplied-artifact section.
 2. Name the operational principle it violates: a DORA capability, a
    Twelve-Factor factor, a Four Golden Signals, RED, or USE dimension, an SLO
    or error-budget rule, an AWS Well-Architected Reliability practice, a CNCF,
@@ -238,12 +242,19 @@ analysis to a security review.
 
 ### Protocol 10: Reliability, Scale, and Production-Only Failure Modes
 
-Look for evidence of N+1 behavior, missing indexes under measured cardinality,
-connection-pool exhaustion, unbounded or un-jittered retries, thundering herd,
-cache stampede, poison pill loops, noisy neighbor effects, timeout inversion,
-cold-start cliff, clock and DST assumptions, certificate expiry, disk-full
-behavior, long-uptime memory leak, and config fan-out. Ask where the first
-limit appears at 10x and 100x traffic.
+Use operational evidence such as telemetry, query plans, capacity
+configuration, deployment controls, and incident records to look for N+1
+behavior, missing indexes under measured cardinality, connection-pool
+exhaustion, unbounded or un-jittered retries, thundering herd, cache stampede,
+poison pill loops, noisy neighbor effects, timeout inversion, cold-start cliff,
+clock and DST assumptions, certificate expiry, disk-full behavior, long-uptime
+memory leak, and config fan-out. Ask where the first limit appears at 10x and
+100x traffic.
+
+Application source may establish that a production runtime path exists, but do
+not judge its implementation to create an Infrastructure-readiness finding.
+Defer any concern whose proof depends on application-source implementation to
+`application-resilience`.
 
 ### Protocol 11: Incident Response Readiness
 

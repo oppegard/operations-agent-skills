@@ -129,11 +129,15 @@ test("the role brief preserves the inquiry-first twelve-protocol review", () => 
 test("every release finding requires exact evidence, a principle, and production impact", () => {
   const role = readSkillFile("references/role-brief.md");
   const report = readSkillFile("references/report-format.md");
+  const evidenceStandard = role.match(
+    /^## Evidence standard$(?<content>[\s\S]*?)^## Inquiry posture$/m,
+  );
 
+  assert.ok(evidenceStandard, "role brief must expose an evidence standard");
   assert.match(role, /file_path:line_number/i);
   assert.match(
     role,
-    /exact code,\s+manifest, pipeline step, or config line/i,
+    phrasePattern("exact code, manifest, pipeline step, or config line"),
   );
   assert.match(role, /operational principle/i);
   assert.match(role, /production impact/i);
@@ -141,6 +145,14 @@ test("every release finding requires exact evidence, a principle, and production
   assert.match(
     role,
     /cannot meet this standard.*do not report|not.*operational risk/is,
+  );
+  assert.match(
+    evidenceStandard.groups.content,
+    /Design seam.*candidate design section.*exact text/is,
+  );
+  assert.match(
+    evidenceStandard.groups.content,
+    /Release\s+seam.*file_path:line_number/is,
   );
 
   for (const label of [
@@ -185,6 +197,9 @@ test("native severity and smallest-safe-next-step sequencing stay intact", () =>
 test("the capability spans operations while deferring source resilience and exploit paths", () => {
   const boundary = readSkillFile("references/capability-boundary.md");
   const role = readSkillFile("references/role-brief.md");
+  const protocolTen = role.match(
+    /^### Protocol 10:.*$(?<content>[\s\S]*?)^### Protocol 11:/m,
+  );
 
   for (const concern of [
     "infrastructure",
@@ -205,6 +220,12 @@ test("the capability spans operations while deferring source resilience and expl
   assert.match(
     boundary,
     /exploit-path\s+security.*security/is,
+  );
+  assert.ok(protocolTen, "role brief must expose Protocol 10");
+  assert.match(protocolTen.groups.content, /operational evidence/i);
+  assert.match(
+    protocolTen.groups.content,
+    /defer.*application-source implementation.*application-resilience/is,
   );
   assert.match(role, phrasePattern("does not write code"));
   assert.match(role, phrasePattern("does not change infrastructure"));
