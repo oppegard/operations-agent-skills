@@ -6,14 +6,223 @@ import test from "node:test";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const skillRoot = join(repoRoot, "skills", "operational-design-review");
+const fixturesRoot = join(
+  repoRoot,
+  "test",
+  "fixtures",
+  "operational-design-review",
+);
 
 function readSkillFile(relativePath) {
   return readFileSync(join(skillRoot, relativePath), "utf8");
 }
 
+function readFixtures(fixtureName) {
+  return JSON.parse(readFileSync(join(fixturesRoot, fixtureName), "utf8"));
+}
+
+function fixtureCases(fixtureName) {
+  return Object.fromEntries(
+    readFixtures(fixtureName).map((fixture) => [fixture.id, fixture]),
+  );
+}
+
+const infrastructureSignals = new Set([
+  "containers",
+  "deployment manifests",
+  "infrastructure as code",
+  "CI/CD",
+  "rollout behavior",
+  "observability",
+  "alert configuration",
+  "feature flags",
+  "operational controls",
+]);
+const applicationSignals = new Set([
+  "remote calls",
+  "dependencies",
+  "latency",
+  "timeouts",
+  "cancellation",
+  "retries",
+  "degradation",
+  "queues",
+  "buffers",
+  "backpressure",
+  "concurrency",
+  "error paths",
+  "fan-out",
+  "partial failure",
+  "idempotency",
+  "repeated delivery",
+  "co-deployed schema migrations",
+]);
+const applicationExclusions = new Set([
+  "documentation",
+  "generated files",
+  "pure configuration",
+  "infrastructure",
+  "infrastructure as code",
+  "deployment manifest",
+  "pipelines",
+  "observability-platform artifacts",
+]);
+
+function routeIntent({ intent }) {
+  return {
+    selectedCapability:
+      {
+        "broad design-readiness": "operational-design-review",
+        "focused Infrastructure-readiness": "infrastructure-readiness",
+        "focused Application-resilience": "application-resilience",
+      }[intent],
+  };
+}
+
+function applyApplicabilityGate({ artifactTypes, operationalSignals }) {
+  const excludedApplicationArtifact = artifactTypes.some((artifactType) =>
+    applicationExclusions.has(artifactType),
+  );
+  const infrastructureApplies = operationalSignals.some((signal) =>
+    infrastructureSignals.has(signal),
+  );
+  const applicationApplies =
+    !excludedApplicationArtifact &&
+    (operationalSignals.includes("new production runtime path") ||
+      (artifactTypes.includes("production application source") &&
+        operationalSignals.some((signal) => applicationSignals.has(signal))));
+  const executed = [];
+  const skipped = [];
+
+  if (infrastructureApplies) {
+    executed.push("Infrastructure readiness");
+  } else {
+    skipped.push({
+      perspective: "Infrastructure readiness",
+      reason: "No Infrastructure-readiness signal",
+    });
+  }
+
+  if (applicationApplies) {
+    executed.push("Application resilience");
+  } else {
+    skipped.push({
+      perspective: "Application resilience",
+      reason: excludedApplicationArtifact
+        ? "Application-source boundary"
+        : "No Application-resilience signal",
+    });
+  }
+
+  return {
+    ...(executed.length === 0 ? { status: "NOT_APPLICABLE" } : {}),
+    executed,
+    skipped,
+  };
+}
+
+function classifyDesignCandidate(candidate) {
+  const isUnresolvedDecision = [
+    "unresolved decision",
+    "open question",
+  ].includes(candidate.state);
+  const isProposalAttributed = ["requires", "worsens", "newly depends on"].includes(
+    candidate.proposalAttribution,
+  );
+
+  return {
+    category:
+      candidate.citation &&
+      isUnresolvedDecision &&
+      isProposalAttributed &&
+      candidate.necessaryForSafeProduction
+        ? "Blocker"
+        : "Advisory",
+  };
+}
+
+function deriveOrchestration(fixture) {
+  if (fixture.availableSkills) {
+    const requiredSkills = {
+      "Infrastructure readiness": "infrastructure-readiness",
+      "Application resilience": "application-resilience",
+    };
+    const missingSkills = fixture.selectedPerspectives
+      .map((perspective) => requiredSkills[perspective])
+      .filter((skillName) => !fixture.availableSkills.includes(skillName));
+
+    return {
+      outcome: "ORCHESTRATION_STOPPED",
+      missingSkills,
+      remedy:
+        "npx skills add oppegard/operations-agent-skills#v1.0.0 --skill '*' --agent codex",
+    };
+  }
+
+  return {
+    execution: fixture.hostCapabilities.includes("independent subagents")
+      ? "concurrent"
+      : "sequential",
+    sharedIntermediateFindings: false,
+    inputIdentity: "same candidate design",
+  };
+}
+
+function deriveReadinessResult(fixture) {
+  if (fixture.reports.length === 0) {
+    return {
+      status: "NOT_APPLICABLE",
+      nextAction: "Continue specification finalization.",
+    };
+  }
+
+  const hasReportedBlocker = fixture.reports.some(
+    (report) => report.blockers?.length > 0,
+  );
+  const hasReportedAdvisory = fixture.reports.some(
+    (report) => report.advisories?.length > 0,
+  );
+  const criticalDisagreement =
+    fixture.disagreement?.unresolved &&
+    fixture.disagreement.criticalProductionSafety &&
+    ["requires", "worsens", "newly depends on"].includes(
+      fixture.disagreement.proposalAttribution,
+    );
+
+  if (hasReportedBlocker || criticalDisagreement) {
+    return {
+      status: "BLOCKED",
+      ...(fixture.disagreement
+        ? { category: "Blocker", preserveAttribution: true }
+        : {
+            nextAction:
+              "Resolve one decision, update the design, and rerun operational-design-review.",
+          }),
+    };
+  }
+
+  if (hasReportedAdvisory || fixture.disagreement?.unresolved) {
+    return {
+      status: "READY_WITH_ADVISORIES",
+      ...(fixture.disagreement
+        ? { category: "Advisory tension", preserveAttribution: true }
+        : {
+            nextAction:
+              "Record the advisory follow-up and continue specification finalization.",
+          }),
+    };
+  }
+
+  return {
+    status: "READY",
+    nextAction: "Continue specification finalization.",
+  };
+}
+
 test("broad design intent selects the orchestrator while focused intent stays specialist", () => {
   const skill = readSkillFile("SKILL.md");
   const boundary = readSkillFile("references/capability-boundary.md");
+  const fixtures = readFixtures("routing.json");
 
   assert.match(
     skill,
@@ -28,26 +237,16 @@ test("broad design intent selects the orchestrator while focused intent stays sp
     /focused Application-resilience.*application-resilience/is,
   );
   assert.match(boundary, /do not add the other perspective/i);
+
+  for (const fixture of fixtures) {
+    assert.deepEqual(routeIntent(fixture.input), fixture.expected);
+  }
 });
 
 test("the Applicability gate selects operational signals and records explicit skips", () => {
   const skill = readSkillFile("SKILL.md");
   const gate = readSkillFile("references/applicability-gate.md");
-  const fixtures = JSON.parse(
-    readFileSync(
-      join(
-        repoRoot,
-        "test",
-        "fixtures",
-        "operational-design-review",
-        "applicability.json",
-      ),
-      "utf8",
-    ),
-  );
-  const cases = Object.fromEntries(
-    fixtures.map((fixture) => [fixture.id, fixture]),
-  );
+  const fixtures = readFixtures("applicability.json");
 
   assert.ok(
     statSync(join(skillRoot, "references", "applicability-gate.md")).isFile(),
@@ -96,23 +295,18 @@ test("the Applicability gate selects operational signals and records explicit sk
     gate,
     /documentation.*generated files.*pure configuration.*infrastructure.*pipelines.*observability-platform artifacts/is,
   );
+  assert.match(gate, /when either.*new production runtime path/is);
+  assert.doesNotMatch(gate, /production fitness/i);
   assert.match(gate, /record an explicit skip reason/i);
   assert.match(gate, /neither perspective.*NOT_APPLICABLE/is);
 
-  assert.deepEqual(cases["infrastructure-only"].expected.executed, [
-    "Infrastructure readiness",
-  ]);
-  assert.deepEqual(cases["application-only"].expected.executed, [
-    "Application resilience",
-  ]);
-  assert.deepEqual(cases["both-perspectives"].expected.executed, [
-    "Infrastructure readiness",
-    "Application resilience",
-  ]);
-  assert.equal(cases["documentation-only"].expected.status, "NOT_APPLICABLE");
-  assert.equal(cases["generated-source"].expected.status, "NOT_APPLICABLE");
-  assert.equal(cases["pure-config"].expected.status, "NOT_APPLICABLE");
-  assert.equal(cases["no-signal"].expected.status, "NOT_APPLICABLE");
+  for (const fixture of fixtures) {
+    assert.deepEqual(
+      applyApplicabilityGate(fixture.input),
+      fixture.expected,
+      fixture.id,
+    );
+  }
 
   for (const fixture of fixtures) {
     assert.ok(
@@ -135,8 +329,9 @@ test("applicable perspectives stay independent across concurrent and sequential 
   );
   assert.match(
     orchestration,
-    /same candidate design.*same Design-seam Engagement contract/is,
+    /same candidate design.*same Design Engagement contract/is,
   );
+  assert.match(orchestration, /Design-seam contract.*specialist/is);
   assert.match(orchestration, /concurrently.*independent subagents/is);
   assert.match(orchestration, /sequential fallback/i);
   assert.match(
@@ -148,21 +343,7 @@ test("applicable perspectives stay independent across concurrent and sequential 
 
 test("missing specialists stop with the exact whole-pack remedy and no fallback copy", () => {
   const orchestration = readSkillFile("references/orchestration.md");
-  const fixtures = JSON.parse(
-    readFileSync(
-      join(
-        repoRoot,
-        "test",
-        "fixtures",
-        "operational-design-review",
-        "orchestration.json",
-      ),
-      "utf8",
-    ),
-  );
-  const cases = Object.fromEntries(
-    fixtures.map((fixture) => [fixture.id, fixture]),
-  );
+  const cases = fixtureCases("orchestration.json");
   const remedy =
     "npx skills add oppegard/operations-agent-skills#v1.0.0 --skill '*' --agent codex";
 
@@ -172,6 +353,9 @@ test("missing specialists stop with the exact whole-pack remedy and no fallback 
   assert.equal(cases["missing-infrastructure"].expected.remedy, remedy);
   assert.equal(cases["missing-application"].expected.remedy, remedy);
   assert.equal(cases["missing-both"].expected.remedy, remedy);
+  for (const fixture of readFixtures("orchestration.json")) {
+    assert.deepEqual(deriveOrchestration(fixture), fixture.expected, fixture.id);
+  }
   assert.doesNotMatch(orchestration, /^### Protocol \d+:/m);
   assert.doesNotMatch(orchestration, /Cascading Failure|Deploy-and-Pray/);
   assert.match(orchestration, /do not embed.*fallback/i);
@@ -201,21 +385,6 @@ test("the Design Engagement contract requires cited design-state reports", () =>
 
 test("only unresolved proposal-attributed production-safety decisions block", () => {
   const engagement = readSkillFile("references/engagement-contract.md");
-  const fixtures = JSON.parse(
-    readFileSync(
-      join(
-        repoRoot,
-        "test",
-        "fixtures",
-        "operational-design-review",
-        "design-results.json",
-      ),
-      "utf8",
-    ),
-  );
-  const cases = Object.fromEntries(
-    fixtures.map((fixture) => [fixture.id, fixture]),
-  );
 
   assert.match(engagement, /unresolved/i);
   assert.match(engagement, /proposal-attributed/i);
@@ -229,11 +398,13 @@ test("only unresolved proposal-attributed production-safety decisions block", ()
     /pre-existing operational debt.*advisory/is,
   );
 
-  assert.equal(cases["valid-design-blocker"].expected.category, "Blocker");
-  assert.equal(cases["pre-existing-debt"].expected.category, "Advisory");
-  assert.equal(cases["resolved-decision"].expected.category, "Advisory");
-  assert.equal(cases["not-production-safety"].expected.category, "Advisory");
-  assert.equal(cases["unattributed-question"].expected.category, "Advisory");
+  for (const fixture of readFixtures("design-results.json")) {
+    assert.equal(
+      classifyDesignCandidate(fixture.candidate).category,
+      fixture.expected.category,
+      fixture.id,
+    );
+  }
 });
 
 test("synthesis preserves disagreement and resolves by evidence rather than voting", () => {
@@ -257,21 +428,7 @@ test("synthesis preserves disagreement and resolves by evidence rather than voti
 
 test("the stable Design Readiness result is complete and rerun-ready", () => {
   const readiness = readSkillFile("references/readiness-result.md");
-  const fixtures = JSON.parse(
-    readFileSync(
-      join(
-        repoRoot,
-        "test",
-        "fixtures",
-        "operational-design-review",
-        "readiness-results.json",
-      ),
-      "utf8",
-    ),
-  );
-  const cases = Object.fromEntries(
-    fixtures.map((fixture) => [fixture.id, fixture]),
-  );
+  const cases = fixtureCases("readiness-results.json");
 
   for (const heading of [
     "Status",
@@ -310,6 +467,13 @@ test("the stable Design Readiness result is complete and rerun-ready", () => {
     cases["critical-disagreement"].expected.category,
     "Blocker",
   );
+  for (const fixture of readFixtures("readiness-results.json")) {
+    assert.deepEqual(
+      deriveReadinessResult(fixture),
+      fixture.expected,
+      fixture.id,
+    );
+  }
   assert.match(
     readiness,
     /BLOCKED.*one decision at a time.*update.*candidate design.*rerun/is,
@@ -318,25 +482,13 @@ test("the stable Design Readiness result is complete and rerun-ready", () => {
 
 test("deterministic and manual fixtures cover the Design gate acceptance corpus", () => {
   const fixtureNames = [
+    "routing.json",
     "applicability.json",
     "orchestration.json",
     "design-results.json",
     "readiness-results.json",
   ];
-  const fixtures = fixtureNames.flatMap((fixtureName) =>
-    JSON.parse(
-      readFileSync(
-        join(
-          repoRoot,
-          "test",
-          "fixtures",
-          "operational-design-review",
-          fixtureName,
-        ),
-        "utf8",
-      ),
-    ),
-  );
+  const fixtures = fixtureNames.flatMap(readFixtures);
   const manualCases = readFileSync(
     join(repoRoot, "eval", "manual", "operational-design-review.md"),
     "utf8",

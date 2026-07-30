@@ -73,6 +73,11 @@
         "citation": "Section 7.1"
       }
     ],
+    "disagreement": {
+      "unresolved": true,
+      "criticalProductionSafety": false,
+      "proposalAttribution": "requires"
+    },
     "expected": {
       "status": "READY_WITH_ADVISORIES",
       "category": "Advisory tension",
@@ -93,8 +98,11 @@
         "citation": "Section 4.2"
       }
     ],
-    "attribution": "proposal requires",
-    "productionSafety": "The safe stop behavior remains unresolved.",
+    "disagreement": {
+      "unresolved": true,
+      "criticalProductionSafety": true,
+      "proposalAttribution": "requires"
+    },
     "expected": {
       "status": "BLOCKED",
       "category": "Blocker",

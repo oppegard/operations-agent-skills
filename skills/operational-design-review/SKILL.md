@@ -15,6 +15,7 @@ request for one named specialist remains a direct specialist engagement.
 Read the bundled [Capability boundary](references/capability-boundary.md),
 [Applicability gate](references/applicability-gate.md), and
 [Orchestration](references/orchestration.md) instructions. Apply the
-[Engagement contract](references/engagement-contract.md) and
+[Engagement contract](references/engagement-contract.md) to every selected
+perspective and apply the
 [Readiness result](references/readiness-result.md) contract when synthesizing
 the review.

@@ -8,6 +8,23 @@ are release evidence, not a CI gate.
 Use disposable candidate designs. Do not point prompts at production systems
 or authorize infrastructure changes.
 
+## broad-design-readiness
+
+Ask whether a candidate design is operationally ready to become a
+specification. Expect `operational-design-review`, not either specialist alone.
+
+## focused-infrastructure
+
+Ask only for the Infrastructure-readiness perspective on a candidate design.
+Expect `infrastructure-readiness` directly and no Application-resilience
+perspective or overall Readiness result.
+
+## focused-application
+
+Ask only for the Application-resilience perspective on a candidate design.
+Expect `application-resilience` directly and no Infrastructure-readiness
+perspective or overall Readiness result.
+
 ## infrastructure-only
 
 Supply a design that changes a deployment manifest and adds a rollout canary.
@@ -44,6 +61,17 @@ Supply a local formatter-setting change with no production effect. Expect
 
 Supply a terminology-only design with no production behavior change. Expect
 `NOT_APPLICABLE` and both no-signal reasons.
+
+## new-runtime-path
+
+Supply a design that introduces a new production runtime path without another
+failure-behavior signal. Expect Application resilience to execute.
+
+## production-fitness-phrase
+
+Call a terminology-only design “production fit” without changing rollout
+behavior. Expect `NOT_APPLICABLE`; the phrase alone must not activate
+Infrastructure readiness.
 
 ## missing-infrastructure
 

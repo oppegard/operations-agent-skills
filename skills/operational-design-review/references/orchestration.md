@@ -34,9 +34,10 @@ Give every selected specialist:
 
 1. the same candidate design, without summarizing it differently per
    perspective;
-2. the same Design-seam Engagement contract from that specialist's bundled
+2. this orchestrator's same Design Engagement contract;
+3. the Design-seam contract from that specialist's bundled
    `references/engagement-contract.md`; and
-3. its own Role brief and report format from the selected specialist skill.
+4. its own Role brief and report format from the selected specialist skill.
 
 Require findings to cite an exact candidate design section and classify the
 cited material as a decision, assumption, constraint, or open question.

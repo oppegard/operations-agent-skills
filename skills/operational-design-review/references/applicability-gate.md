@@ -13,8 +13,7 @@ Select Infrastructure readiness when the design affects any of:
 - CI/CD, deployment sequencing, progressive delivery, or rollback behavior;
 - observability or alert configuration;
 - feature flags or other operational controls; or
-- any artifact or decision that changes rollout behavior or production
-  fitness.
+- any other artifact or decision that changes rollout behavior.
 
 Otherwise skip it and record:
 
@@ -24,15 +23,19 @@ Otherwise skip it and record:
 
 ## Application resilience
 
-Select Application resilience only when the design changes production
-application source or a new production runtime path and involves one or more
-of:
+Select Application resilience when either:
+
+- the design changes production application source involving one or more of
+  the signals below; or
+- the design introduces a new production runtime path.
+
+The application-source signals are:
 
 - remote calls, dependencies, latency, timeouts, or cancellation;
 - retries or degradation behavior;
 - queues, buffers, or backpressure;
 - concurrency, error paths, fan-out, or partial failure;
-- idempotency or repeated delivery; or
+- idempotency or repeated delivery; and
 - co-deployed schema migrations.
 
 Documentation, generated files, pure configuration, infrastructure, pipelines,
