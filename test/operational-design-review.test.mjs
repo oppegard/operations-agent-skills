@@ -27,55 +27,30 @@ function fixtureCases(fixtureName) {
   );
 }
 
-const infrastructureSignals = new Set([
-  "containers",
-  "deployment manifests",
-  "infrastructure as code",
-  "CI/CD",
-  "rollout behavior",
-  "observability",
-  "alert configuration",
-  "feature flags",
-  "operational controls",
-]);
-const applicationSignals = new Set([
-  "remote calls",
-  "dependencies",
-  "latency",
-  "timeouts",
-  "cancellation",
-  "retries",
-  "degradation",
-  "queues",
-  "buffers",
-  "backpressure",
-  "concurrency",
-  "error paths",
-  "fan-out",
-  "partial failure",
-  "idempotency",
-  "repeated delivery",
-  "co-deployed schema migrations",
-]);
-const applicationExclusions = new Set([
-  "documentation",
-  "generated files",
-  "pure configuration",
-  "infrastructure",
-  "infrastructure as code",
-  "deployment manifest",
-  "pipelines",
-  "observability-platform artifacts",
-]);
+const controlContract = JSON.parse(
+  readSkillFile("references/control-contract.json"),
+);
+const infrastructureContract =
+  controlContract.applicability.infrastructure;
+const applicationContract = controlContract.applicability.application;
+const infrastructureSignals = new Set(infrastructureContract.signals);
+const applicationSignals = new Set(applicationContract.sourceSignals);
+const independentApplicationSignals = new Set(
+  applicationContract.independentSignals,
+);
+const applicationExclusions = new Set(
+  applicationContract.excludedArtifacts,
+);
+const proposalAttributions = new Set(
+  controlContract.designBlocker.proposalAttributions,
+);
+const unresolvedDesignStates = new Set(
+  controlContract.designBlocker.unresolvedStates,
+);
 
 function routeIntent({ intent }) {
   return {
-    selectedCapability:
-      {
-        "broad design-readiness": "operational-design-review",
-        "focused Infrastructure-readiness": "infrastructure-readiness",
-        "focused Application-resilience": "application-resilience",
-      }[intent],
+    selectedCapability: controlContract.routing[intent],
   };
 }
 
@@ -88,91 +63,101 @@ function applyApplicabilityGate({ artifactTypes, operationalSignals }) {
   );
   const applicationApplies =
     !excludedApplicationArtifact &&
-    (operationalSignals.includes("new production runtime path") ||
-      (artifactTypes.includes("production application source") &&
+    (operationalSignals.some((signal) =>
+      independentApplicationSignals.has(signal),
+    ) ||
+      (artifactTypes.includes(applicationContract.sourceArtifact) &&
         operationalSignals.some((signal) => applicationSignals.has(signal))));
   const executed = [];
   const skipped = [];
 
   if (infrastructureApplies) {
-    executed.push("Infrastructure readiness");
+    executed.push(infrastructureContract.perspective);
   } else {
     skipped.push({
-      perspective: "Infrastructure readiness",
-      reason: "No Infrastructure-readiness signal",
+      perspective: infrastructureContract.perspective,
+      reason: infrastructureContract.skipReason,
     });
   }
 
   if (applicationApplies) {
-    executed.push("Application resilience");
+    executed.push(applicationContract.perspective);
   } else {
     skipped.push({
-      perspective: "Application resilience",
+      perspective: applicationContract.perspective,
       reason: excludedApplicationArtifact
-        ? "Application-source boundary"
-        : "No Application-resilience signal",
+        ? applicationContract.boundarySkipReason
+        : applicationContract.noSignalSkipReason,
     });
   }
 
   return {
-    ...(executed.length === 0 ? { status: "NOT_APPLICABLE" } : {}),
+    ...(executed.length === 0
+      ? { status: controlContract.applicability.notApplicableStatus }
+      : {}),
     executed,
     skipped,
   };
 }
 
 function classifyDesignCandidate(candidate) {
-  const isUnresolvedDecision = [
-    "unresolved decision",
-    "open question",
-  ].includes(candidate.state);
-  const isProposalAttributed = ["requires", "worsens", "newly depends on"].includes(
-    candidate.proposalAttribution,
+  const blockerContract = controlContract.designBlocker;
+  const isUnresolvedDecision = unresolvedDesignStates.has(
+    candidate[blockerContract.stateField],
+  );
+  const isProposalAttributed = proposalAttributions.has(
+    candidate[blockerContract.proposalAttributionField],
   );
 
   return {
     category:
-      candidate.citation &&
+      candidate[blockerContract.citationField] &&
       isUnresolvedDecision &&
       isProposalAttributed &&
-      candidate.necessaryForSafeProduction
-        ? "Blocker"
-        : "Advisory",
+      candidate[blockerContract.safeProductionField]
+        ? blockerContract.blockingCategory
+        : blockerContract.advisoryCategory,
   };
 }
 
 function deriveOrchestration(fixture) {
   if (fixture.availableSkills) {
-    const requiredSkills = {
-      "Infrastructure readiness": "infrastructure-readiness",
-      "Application resilience": "application-resilience",
-    };
+    const requiredSkills = Object.fromEntries(
+      [infrastructureContract, applicationContract].map((contract) => [
+        contract.perspective,
+        contract.skill,
+      ]),
+    );
     const missingSkills = fixture.selectedPerspectives
       .map((perspective) => requiredSkills[perspective])
       .filter((skillName) => !fixture.availableSkills.includes(skillName));
 
     return {
-      outcome: "ORCHESTRATION_STOPPED",
+      outcome: controlContract.orchestration.stoppedOutcome,
       missingSkills,
-      remedy:
-        "npx skills add oppegard/operations-agent-skills#v1.0.0 --skill '*' --agent codex",
+      remedy: controlContract.orchestration.wholePackRemedies.codex,
     };
   }
 
   return {
-    execution: fixture.hostCapabilities.includes("independent subagents")
-      ? "concurrent"
-      : "sequential",
+    execution: fixture.hostCapabilities.includes(
+      controlContract.orchestration.concurrentCapability,
+    )
+      ? controlContract.orchestration.concurrentExecution
+      : controlContract.orchestration.fallbackExecution,
     sharedIntermediateFindings: false,
-    inputIdentity: "same candidate design",
+    inputIdentity: controlContract.orchestration.inputIdentity,
   };
 }
 
 function deriveReadinessResult(fixture) {
+  const { nextActions, statuses, disagreementCategories } =
+    controlContract.readiness;
+
   if (fixture.reports.length === 0) {
     return {
-      status: "NOT_APPLICABLE",
-      nextAction: "Continue specification finalization.",
+      status: statuses.notApplicable,
+      nextAction: nextActions[statuses.notApplicable],
     };
   }
 
@@ -185,39 +170,85 @@ function deriveReadinessResult(fixture) {
   const criticalDisagreement =
     fixture.disagreement?.unresolved &&
     fixture.disagreement.criticalProductionSafety &&
-    ["requires", "worsens", "newly depends on"].includes(
-      fixture.disagreement.proposalAttribution,
-    );
+    proposalAttributions.has(fixture.disagreement.proposalAttribution);
 
   if (hasReportedBlocker || criticalDisagreement) {
     return {
-      status: "BLOCKED",
+      status: statuses.blocked,
+      nextAction: nextActions[statuses.blocked],
       ...(fixture.disagreement
-        ? { category: "Blocker", preserveAttribution: true }
-        : {
-            nextAction:
-              "Resolve one decision, update the design, and rerun operational-design-review.",
-          }),
+        ? {
+            category: disagreementCategories.critical,
+            preserveAttribution: true,
+          }
+        : {}),
     };
   }
 
   if (hasReportedAdvisory || fixture.disagreement?.unresolved) {
     return {
-      status: "READY_WITH_ADVISORIES",
+      status: statuses.advisory,
+      nextAction: nextActions[statuses.advisory],
       ...(fixture.disagreement
-        ? { category: "Advisory tension", preserveAttribution: true }
-        : {
-            nextAction:
-              "Record the advisory follow-up and continue specification finalization.",
-          }),
+        ? {
+            category: disagreementCategories.nonCritical,
+            preserveAttribution: true,
+          }
+        : {}),
     };
   }
 
   return {
-    status: "READY",
-    nextAction: "Continue specification finalization.",
+    status: statuses.ready,
+    nextAction: nextActions[statuses.ready],
   };
 }
+
+test("the normative public control contract drives deterministic decisions", () => {
+  const skill = readSkillFile("SKILL.md");
+  const gate = readSkillFile("references/applicability-gate.md");
+  const orchestration = readSkillFile("references/orchestration.md");
+  const engagement = readSkillFile("references/engagement-contract.md");
+  const readiness = readSkillFile("references/readiness-result.md");
+
+  assert.ok(
+    statSync(join(skillRoot, "references", "control-contract.json")).isFile(),
+  );
+  assert.equal(controlContract.schemaVersion, 1);
+  assert.match(
+    skill,
+    /\[Control contract\]\(references\/control-contract\.json\).*normative/is,
+  );
+  assert.match(skill, /must not redefine a conflicting control value/i);
+
+  for (const signal of [
+    ...infrastructureContract.signals,
+    ...applicationContract.sourceSignals,
+    ...applicationContract.independentSignals,
+    ...applicationContract.excludedArtifacts,
+  ]) {
+    assert.match(gate, new RegExp(signal, "i"));
+  }
+  assert.match(gate, new RegExp(infrastructureContract.skipReason, "i"));
+  assert.match(gate, new RegExp(applicationContract.boundarySkipReason, "i"));
+  assert.match(gate, new RegExp(applicationContract.noSignalSkipReason, "i"));
+
+  for (const remedy of Object.values(
+    controlContract.orchestration.wholePackRemedies,
+  )) {
+    assert.match(
+      orchestration,
+      new RegExp(remedy.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+    );
+  }
+  for (const attribution of proposalAttributions) {
+    assert.match(engagement, new RegExp(attribution, "i"));
+  }
+  for (const status of Object.values(controlContract.readiness.statuses)) {
+    assert.match(readiness, new RegExp(`\\b${status}\\b`));
+  }
+  assert.doesNotMatch(gate, /production fitness/i);
+});
 
 test("broad design intent selects the orchestrator while focused intent stays specialist", () => {
   const skill = readSkillFile("SKILL.md");

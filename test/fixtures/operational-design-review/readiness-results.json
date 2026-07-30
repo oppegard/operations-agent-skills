@@ -81,7 +81,8 @@
     "expected": {
       "status": "READY_WITH_ADVISORIES",
       "category": "Advisory tension",
-      "preserveAttribution": true
+      "preserveAttribution": true,
+      "nextAction": "Record the advisory follow-up and continue specification finalization."
     }
   },
   {
@@ -106,7 +107,8 @@
     "expected": {
       "status": "BLOCKED",
       "category": "Blocker",
-      "preserveAttribution": true
+      "preserveAttribution": true,
+      "nextAction": "Resolve one decision, update the design, and rerun operational-design-review."
     }
   }
 ]
