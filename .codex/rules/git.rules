@@ -8,6 +8,7 @@ prefix_rule(
             "show",
             "add",
             "commit",
+            "worktree",
         ],
     ],
     decision = "allow",
@@ -19,6 +20,9 @@ prefix_rule(
         "git show HEAD",
         "git add README.md",
         "git commit -m 'docs: update README'",
+        "git worktree list",
+        "git worktree add ../operations-agent-skills-feature feature",
+        "git worktree remove ../operations-agent-skills-feature",
     ],
     not_match = [
         "git push origin main",
