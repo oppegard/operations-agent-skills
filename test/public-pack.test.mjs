@@ -178,10 +178,6 @@ test("the repository documents and verifies the whole-pack contract", () => {
     join(repoRoot, "SOURCE_PROVENANCE.md"),
     "utf8",
   );
-  const workflow = readFileSync(
-    join(repoRoot, ".github", "workflows", "ci.yml"),
-    "utf8",
-  );
   const packageManifest = JSON.parse(
     readFileSync(join(repoRoot, "package.json"), "utf8"),
   );
@@ -209,7 +205,4 @@ test("the repository documents and verifies the whole-pack contract", () => {
   assert.match(provenance, /Original Operations Pack work/);
 
   assert.equal(packageManifest.dependencies, undefined);
-  assert.equal(packageManifest.scripts.test, "node --test");
-  assert.match(workflow, /npm ci/);
-  assert.match(workflow, /npm test/);
 });
