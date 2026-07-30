@@ -1,0 +1,273 @@
+[
+  {
+    "id": "broad-selection",
+    "prompt": "Is this functionally reviewed change ready for production?",
+    "expected": {
+      "selectedCapability": "production-readiness-review"
+    }
+  },
+  {
+    "id": "focused-infrastructure",
+    "prompt": "Give me only the Infrastructure-readiness perspective on this rollout.",
+    "expected": {
+      "selectedCapability": "infrastructure-readiness",
+      "completeReadinessResult": false
+    }
+  },
+  {
+    "id": "focused-application",
+    "prompt": "Give me only the Application-resilience perspective on this worker.",
+    "expected": {
+      "selectedCapability": "application-resilience",
+      "completeReadinessResult": false
+    }
+  },
+  {
+    "id": "missing-baseline",
+    "input": {
+      "fixedPoint": null,
+      "diff": null,
+      "specification": null
+    },
+    "expected": {
+      "requiredInputs": [
+        "functionally reviewed fixed point",
+        "change diff",
+        "specification"
+      ],
+      "reviewStarted": false,
+      "status": null
+    }
+  },
+  {
+    "id": "infrastructure-only",
+    "change": [
+      "deploy/service.yaml",
+      "infra/service.tf",
+      ".github/workflows/release.yml"
+    ],
+    "expected": {
+      "executedPerspectives": [
+        "infrastructure-readiness"
+      ],
+      "skipped": {
+        "application-resilience": "no production application source signal"
+      }
+    }
+  },
+  {
+    "id": "application-only",
+    "change": [
+      "src/payment-client.js"
+    ],
+    "signals": [
+      "remote call",
+      "timeout",
+      "cancellation"
+    ],
+    "expected": {
+      "executedPerspectives": [
+        "application-resilience"
+      ],
+      "skipped": {
+        "infrastructure-readiness": "no rollout-affecting operational artifact"
+      }
+    }
+  },
+  {
+    "id": "dual-perspective",
+    "change": [
+      "src/worker.js",
+      "deploy/worker.yaml"
+    ],
+    "expected": {
+      "executedPerspectives": [
+        "infrastructure-readiness",
+        "application-resilience"
+      ],
+      "sameBaseline": true,
+      "independent": true
+    }
+  },
+  {
+    "id": "not-applicable",
+    "change": [
+      "docs/glossary.md",
+      "generated/api.md"
+    ],
+    "expected": {
+      "status": "NOT_APPLICABLE",
+      "executedPerspectives": [],
+      "skipReasons": {
+        "infrastructure-readiness": "no rollout-affecting operational signal",
+        "application-resilience": "documentation and generated files are outside the Application-source boundary"
+      }
+    }
+  },
+  {
+    "id": "ready",
+    "reports": {
+      "infrastructure-readiness": {
+        "findings": [],
+        "openQuestions": []
+      },
+      "application-resilience": {
+        "findings": [],
+        "openQuestions": []
+      }
+    },
+    "expected": {
+      "status": "READY"
+    }
+  },
+  {
+    "id": "advisory",
+    "candidate": {
+      "perspective": "infrastructure-readiness",
+      "severity": "Operational friction",
+      "attribution": "Change-attributed"
+    },
+    "expected": {
+      "status": "READY_WITH_ADVISORIES",
+      "promotedToBlocker": false
+    }
+  },
+  {
+    "id": "infrastructure-blocker",
+    "candidate": {
+      "perspective": "infrastructure-readiness",
+      "severity": "Blocks rollout",
+      "attribution": "Change-attributed",
+      "evidence": "deploy/service.yaml:18 introduces image: checkout:latest",
+      "productionImpact": "the reviewed release cannot be reproduced or rolled back to a known image"
+    },
+    "expected": {
+      "status": "BLOCKED",
+      "evidenceValidated": true,
+      "attributionValidated": true
+    }
+  },
+  {
+    "id": "application-blocker",
+    "candidate": {
+      "perspective": "application-resilience",
+      "severity": "Wakes someone up",
+      "attribution": "Change-attributed",
+      "evidence": "src/checkout.js:41 adds an unbounded payment call on the request path",
+      "productionImpact": "dependency degradation exhausts request workers for all checkout users"
+    },
+    "expected": {
+      "status": "BLOCKED",
+      "evidenceValidated": true,
+      "attributionValidated": true
+    }
+  },
+  {
+    "id": "ambient-risk",
+    "candidate": {
+      "perspective": "application-resilience",
+      "severity": "Wakes someone up",
+      "attribution": "Ambient risk",
+      "evidence": "src/legacy.js:9 predates and is not newly relied upon by the change"
+    },
+    "expected": {
+      "section": "Ambient risks",
+      "promotedToBlocker": false
+    }
+  },
+  {
+    "id": "open-question",
+    "question": {
+      "text": "What timeout does the unchanged SDK default to?",
+      "concreteChangedRisk": false
+    },
+    "expected": {
+      "status": "READY_WITH_ADVISORIES",
+      "promotedToBlocker": false
+    }
+  },
+  {
+    "id": "critical-open-question",
+    "question": {
+      "text": "Does the newly selected payment client have any deadline?",
+      "changedEvidence": "src/checkout.js:41 newly routes every checkout through the client",
+      "couldEstablishSeverity": "Wakes someone up"
+    },
+    "expected": {
+      "status": "BLOCKED",
+      "resolution": "answer with evidence or implement the safe default"
+    }
+  },
+  {
+    "id": "advisory-disagreement",
+    "disagreement": {
+      "infrastructure-readiness": "rollout telemetry is incomplete",
+      "application-resilience": "the source change has bounded failure behavior",
+      "attributableCriticalRisk": false
+    },
+    "expected": {
+      "status": "READY_WITH_ADVISORIES",
+      "section": "Advisories",
+      "preserveAttribution": true
+    }
+  },
+  {
+    "id": "critical-disagreement",
+    "disagreement": {
+      "infrastructure-readiness": "the new rollout has no safe rollback control",
+      "application-resilience": "the process can tolerate mixed versions",
+      "changedEvidence": "deploy/service.yaml:22 removes the prior rollback gate",
+      "attributableCriticalRisk": true
+    },
+    "expected": {
+      "status": "BLOCKED",
+      "preserveAttribution": true,
+      "resolvedByVote": false
+    }
+  },
+  {
+    "id": "agent-risk-acceptance",
+    "blocker": "REL-001",
+    "acceptance": {
+      "actor": "implementation agent",
+      "statement": "I accept this risk so I can commit."
+    },
+    "expected": {
+      "accepted": false,
+      "status": "BLOCKED"
+    }
+  },
+  {
+    "id": "human-risk-acceptance",
+    "blocker": "REL-001",
+    "acceptance": {
+      "actor": "release owner",
+      "risk": "floating image prevents a reproducible rollback",
+      "fixedPoint": "abc123",
+      "scope": "one canary rollout"
+    },
+    "expected": {
+      "accepted": true,
+      "status": "READY_WITH_ADVISORIES",
+      "section": "Advisories"
+    }
+  },
+  {
+    "id": "remediation-rerun",
+    "initial": {
+      "fixedPoint": "abc123",
+      "status": "BLOCKED",
+      "blocker": "REL-001"
+    },
+    "remediation": {
+      "operationallyRelevant": true,
+      "change": "pin the image by digest"
+    },
+    "expected": {
+      "newBaselineRequired": true,
+      "functionalReviewRequired": true,
+      "operationalReviewRequired": true,
+      "carryForwardStaleFindings": false
+    }
+  }
+]
