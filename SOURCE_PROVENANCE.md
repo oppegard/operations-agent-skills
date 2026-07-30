@@ -26,6 +26,9 @@ injection with host-neutral skill instructions.
 | `skills/runbook/references/runbook-template.md` | `han-core/skills/runbook/references/runbook-template.md` | Preserves the procedural metadata, action and expected-result pairing, verification, escalation, rollback, live links, optional-section rules, and change history with host-neutral wording. |
 | `skills/runbook/references/quality-check.md` | `han-core/skills/runbook/SKILL.md`; `han-core/references/readability-rule.md`; `han-core/references/writing-voice.md` | Extracts the final completeness and readability checks, including the rule that editing must preserve every factual condition. |
 | `skills/runbook/references/writing-blocklist.md` | `han-core/references/readability-rule.md`; `han-core/references/writing-voice.md` | Preserves the complete vocabulary blocklist used by Han's runbook readability self-check. |
+| `skills/infrastructure-readiness/SKILL.md` | `han-core/agents/devops-engineer.md` | Exposes Han's DevOps and SRE judgment through the stable, directly invocable capability while replacing registered-agent behavior with host-neutral references. |
+| `skills/infrastructure-readiness/references/role-brief.md` | `han-core/agents/devops-engineer.md`; `han-core/references/evidence-rule.md`; `han-core/references/yagni-rule.md` | Preserves the inquiry-first posture, operational vocabulary, named anti-patterns and failure modes, twelve protocols, evidence discipline, native severity, evidence-based YAGNI gate, and P0/P1/P2 sequencing. |
+| `skills/infrastructure-readiness/references/report-format.md` | `han-core/agents/devops-engineer.md` | Preserves the question log, assumptions, open questions, exact finding fields, native severity summary, protocol-clear records, and improvement summary in a portable perspective-report contract. |
 
 ## Original Operations Pack work
 
@@ -33,11 +36,14 @@ The following artifact groups originate in Operations Pack:
 
 | Artifact | Purpose |
 | --- | --- |
-| `skills/*/SKILL.md` except `skills/runbook/SKILL.md` | Stable public capability names, discovery metadata, and invocation boundaries not yet adapted from Han |
+| `skills/*/SKILL.md` except `skills/runbook/SKILL.md` and `skills/infrastructure-readiness/SKILL.md` | Stable public capability names, discovery metadata, and invocation boundaries not yet adapted from Han |
 | `skills/*/references/capability-boundary.md` | Portable v1 capability boundaries |
+| `skills/infrastructure-readiness/references/engagement-contract.md` | Portable Direct, Design-seam, and Release-seam contracts layered around the shared specialist behavior |
 | `test/public-pack.test.mjs` | Consumer-visible pack contract |
 | `test/runbook.test.mjs` and `test/fixtures/runbook/` | Deterministic public-boundary verification for the extracted runbook contract |
+| `test/infrastructure-readiness.test.mjs` and `test/fixtures/infrastructure-readiness/` | Deterministic routing, boundary, evidence, severity, and engagement verification for Infrastructure readiness |
 | `eval/manual/runbook.md` | Cross-host manual prompt corpus and expected observations |
+| `eval/manual/infrastructure-readiness.md` | Cross-host direct-selection, boundary, evidence, severity, and seam-engagement prompt corpus |
 | `README.md` | Whole-pack installation and verification guidance |
 | `.github/workflows/ci.yml` | Deterministic public-boundary CI entry point |
 
