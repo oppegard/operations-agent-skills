@@ -1,0 +1,64 @@
+[
+  {
+    "id": "missing-infrastructure",
+    "availableSkills": ["application-resilience"],
+    "selectedPerspectives": ["Infrastructure readiness"],
+    "expected": {
+      "outcome": "ORCHESTRATION_STOPPED",
+      "missingSkills": ["infrastructure-readiness"],
+      "remedy": "npx skills add oppegard/operations-agent-skills#v1.0.0 --skill '*' --agent codex"
+    }
+  },
+  {
+    "id": "missing-application",
+    "availableSkills": ["infrastructure-readiness"],
+    "selectedPerspectives": ["Application resilience"],
+    "expected": {
+      "outcome": "ORCHESTRATION_STOPPED",
+      "missingSkills": ["application-resilience"],
+      "remedy": "npx skills add oppegard/operations-agent-skills#v1.0.0 --skill '*' --agent codex"
+    }
+  },
+  {
+    "id": "missing-both",
+    "availableSkills": [],
+    "selectedPerspectives": [
+      "Infrastructure readiness",
+      "Application resilience"
+    ],
+    "expected": {
+      "outcome": "ORCHESTRATION_STOPPED",
+      "missingSkills": [
+        "infrastructure-readiness",
+        "application-resilience"
+      ],
+      "remedy": "npx skills add oppegard/operations-agent-skills#v1.0.0 --skill '*' --agent codex"
+    }
+  },
+  {
+    "id": "concurrent-independent",
+    "hostCapabilities": ["independent subagents"],
+    "selectedPerspectives": [
+      "Infrastructure readiness",
+      "Application resilience"
+    ],
+    "expected": {
+      "execution": "concurrent",
+      "sharedIntermediateFindings": false,
+      "inputIdentity": "same candidate design"
+    }
+  },
+  {
+    "id": "sequential-independent",
+    "hostCapabilities": [],
+    "selectedPerspectives": [
+      "Infrastructure readiness",
+      "Application resilience"
+    ],
+    "expected": {
+      "execution": "sequential",
+      "sharedIntermediateFindings": false,
+      "inputIdentity": "same candidate design"
+    }
+  }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "id": "infrastructure-only",
+    "input": {
+      "design": "Replace the deployment manifest and add a rollout canary."
+    },
+    "expected": {
+      "status": "READY",
+      "executed": ["Infrastructure readiness"],
+      "skipped": [
+        {
+          "perspective": "Application resilience",
+          "reason": "Application-source boundary"
+        }
+      ]
+    }
+  },
+  {
+    "id": "application-only",
+    "input": {
+      "design": "Add bounded retries and cancellation to a production HTTP client."
+    },
+    "expected": {
+      "status": "READY",
+      "executed": ["Application resilience"],
+      "skipped": [
+        {
+          "perspective": "Infrastructure readiness",
+          "reason": "No Infrastructure-readiness signal"
+        }
+      ]
+    }
+  },
+  {
+    "id": "both-perspectives",
+    "input": {
+      "design": "Add a queue consumer with repeated-delivery handling and a progressive rollout flag."
+    },
+    "expected": {
+      "status": "READY",
+      "executed": [
+        "Infrastructure readiness",
+        "Application resilience"
+      ],
+      "skipped": []
+    }
+  },
+  {
+    "id": "documentation-only",
+    "input": {
+      "design": "Reorganize public API documentation without changing behavior."
+    },
+    "expected": {
+      "status": "NOT_APPLICABLE",
+      "executed": [],
+      "skipped": [
+        {
+          "perspective": "Infrastructure readiness",
+          "reason": "No Infrastructure-readiness signal"
+        },
+        {
+          "perspective": "Application resilience",
+          "reason": "Application-source boundary"
+        }
+      ]
+    }
+  },
+  {
+    "id": "generated-source",
+    "input": {
+      "design": "Regenerate an API client without changing its generator or runtime behavior."
+    },
+    "expected": {
+      "status": "NOT_APPLICABLE",
+      "executed": [],
+      "skipped": [
+        {
+          "perspective": "Infrastructure readiness",
+          "reason": "No Infrastructure-readiness signal"
+        },
+        {
+          "perspective": "Application resilience",
+          "reason": "Application-source boundary"
+        }
+      ]
+    }
+  },
+  {
+    "id": "pure-config",
+    "input": {
+      "design": "Rename a local formatter setting with no production effect."
+    },
+    "expected": {
+      "status": "NOT_APPLICABLE",
+      "executed": [],
+      "skipped": [
+        {
+          "perspective": "Infrastructure readiness",
+          "reason": "No Infrastructure-readiness signal"
+        },
+        {
+          "perspective": "Application resilience",
+          "reason": "Application-source boundary"
+        }
+      ]
+    }
+  },
+  {
+    "id": "no-signal",
+    "input": {
+      "design": "Rename an internal design term without changing production behavior."
+    },
+    "expected": {
+      "status": "NOT_APPLICABLE",
+      "executed": [],
+      "skipped": [
+        {
+          "perspective": "Infrastructure readiness",
+          "reason": "No Infrastructure-readiness signal"
+        },
+        {
+          "perspective": "Application resilience",
+          "reason": "No Application-resilience signal"
+        }
+      ]
+    }
+  }
+]

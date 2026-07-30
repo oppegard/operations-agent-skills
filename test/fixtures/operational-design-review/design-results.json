@@ -1,0 +1,63 @@
+[
+  {
+    "id": "valid-design-blocker",
+    "candidate": {
+      "citation": "Section 4.2: Deploy in one step without a rollback signal.",
+      "state": "unresolved decision",
+      "attribution": "proposal requires",
+      "productionSafety": "No safe rollback behavior is specified."
+    },
+    "expected": {
+      "category": "Blocker",
+      "decision": "Define the rollback signal and stop condition."
+    }
+  },
+  {
+    "id": "pre-existing-debt",
+    "candidate": {
+      "citation": "Section 2.1: Existing alerts do not link to runbooks.",
+      "state": "constraint",
+      "attribution": "pre-existing",
+      "productionSafety": "The proposal does not require or worsen the gap."
+    },
+    "expected": {
+      "category": "Advisory"
+    }
+  },
+  {
+    "id": "resolved-decision",
+    "candidate": {
+      "citation": "Section 5.3: Stop at 2% errors and roll back.",
+      "state": "resolved decision",
+      "attribution": "proposal requires",
+      "productionSafety": "Safe stop behavior is specified."
+    },
+    "expected": {
+      "category": "Advisory"
+    }
+  },
+  {
+    "id": "not-production-safety",
+    "candidate": {
+      "citation": "Section 6.1: Dashboard colors remain undecided.",
+      "state": "unresolved decision",
+      "attribution": "proposal requires",
+      "productionSafety": "The choice is not necessary for safe production behavior."
+    },
+    "expected": {
+      "category": "Advisory"
+    }
+  },
+  {
+    "id": "unattributed-question",
+    "candidate": {
+      "citation": "Section 1.4: Recovery ownership is unknown.",
+      "state": "open question",
+      "attribution": "not established",
+      "productionSafety": "No evidence ties the question to behavior the proposal requires, worsens, or newly depends on."
+    },
+    "expected": {
+      "category": "Advisory"
+    }
+  }
+]
