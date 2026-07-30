@@ -1,0 +1,84 @@
+[
+  {
+    "id": "direct-selection",
+    "prompt": "Give me the Infrastructure-readiness perspective on this Terraform module.",
+    "expected": {
+      "selectedCapability": "infrastructure-readiness",
+      "focusedDisclaimer": true
+    }
+  },
+  {
+    "id": "broad-readiness",
+    "prompt": "Is this change ready for production?",
+    "expected": {
+      "selectedCapability": "production-readiness-review"
+    }
+  },
+  {
+    "id": "application-source-boundary",
+    "prompt": "Review retry and timeout behavior in this HTTP client implementation.",
+    "expected": {
+      "deferTo": "application-resilience",
+      "infrastructureFinding": false
+    }
+  },
+  {
+    "id": "exploit-path-boundary",
+    "prompt": "Trace whether this request parameter reaches a shell command.",
+    "expected": {
+      "deferTo": "security review",
+      "infrastructureFinding": false
+    }
+  },
+  {
+    "id": "insufficient-evidence",
+    "prompt": "The repository contains no rollout, environment, traffic, or recovery evidence. List whatever might go wrong.",
+    "expected": {
+      "findings": [],
+      "openQuestions": true
+    }
+  },
+  {
+    "id": "release-blocker",
+    "engagement": {
+      "seam": "Release",
+      "artifact": "deploy/service.yaml:18 image: checkout:latest"
+    },
+    "expected": {
+      "severity": "Blocks rollout",
+      "namedFailureMode": "Latest Tag in Production",
+      "requiredFindingFields": [
+        "exact artifact evidence",
+        "operational principle or named failure mode",
+        "concrete production impact"
+      ],
+      "p0": "pin the reviewed image by digest"
+    }
+  },
+  {
+    "id": "design-engagement",
+    "engagement": {
+      "seam": "Design",
+      "artifact": "Candidate design section 4.2"
+    },
+    "expected": {
+      "citeCandidateSection": true,
+      "classifyDesignMaterial": true,
+      "overallReadinessResult": false
+    }
+  },
+  {
+    "id": "release-engagement",
+    "engagement": {
+      "seam": "Release",
+      "baseline": "merge-base plus specification"
+    },
+    "expected": {
+      "classifyAttribution": [
+        "Change-attributed",
+        "Ambient risk"
+      ],
+      "overallReadinessResult": false
+    }
+  }
+]
