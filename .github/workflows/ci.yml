@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  public-pack-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22.20.0
+          cache: npm
+
+      - name: Install development tooling
+        run: npm ci
+
+      - name: Verify public pack contract
+        run: npm test
