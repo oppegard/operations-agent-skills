@@ -1,0 +1,115 @@
+[
+  {
+    "id": "direct-selection",
+    "prompt": "Give me the Application-resilience perspective on this HTTP client.",
+    "expected": {
+      "selectedCapability": "application-resilience",
+      "focusedDisclaimer": true
+    }
+  },
+  {
+    "id": "broad-readiness",
+    "prompt": "Is this change ready for production?",
+    "expected": {
+      "selectedCapability": "production-readiness-review"
+    }
+  },
+  {
+    "id": "infrastructure-boundary",
+    "prompt": "Review this Kubernetes manifest and alert dashboard for resilience.",
+    "expected": {
+      "deferTo": "infrastructure-readiness",
+      "applicationFinding": false
+    }
+  },
+  {
+    "id": "non-source-boundary",
+    "prompt": "Review generated API docs and pure configuration for application resilience.",
+    "expected": {
+      "selectedCapability": null,
+      "applicationFinding": false
+    }
+  },
+  {
+    "id": "insufficient-evidence",
+    "prompt": "There is no cited application source or production behavior. List every resilience problem that might exist.",
+    "expected": {
+      "findings": [],
+      "openQuestions": true
+    }
+  },
+  {
+    "id": "release-page-risk",
+    "engagement": {
+      "seam": "Release",
+      "artifact": "src/checkout.js:41 await paymentClient.charge(order)"
+    },
+    "expected": {
+      "severity": "Wakes someone up",
+      "namedAntiPattern": "Missing or incomplete timeout",
+      "namedFailureMode": "Cascading Failure",
+      "requiredFindingFields": [
+        "exact application-source evidence",
+        "named anti-pattern and production failure mode",
+        "triggering conditions, affected users, and blast radius"
+      ],
+      "todaySmallestSafeStep": "add a bounded timeout and propagate cancellation"
+    }
+  },
+  {
+    "id": "severity-calibration",
+    "engagement": {
+      "seam": "Release",
+      "artifact": "A remote call with unknown traffic, timeout defaults, callers, and user impact"
+    },
+    "expected": {
+      "maximumSeverity": "Open question",
+      "severityFromPatternNameAlone": false
+    }
+  },
+  {
+    "id": "protocol-coverage",
+    "prompt": "Review application source containing an HTTP call, retry, async worker, queue consumer, repeated message delivery, migration, and new runtime branch.",
+    "expected": {
+      "protocolsExecuted": 8,
+      "concerns": [
+        "remote calls",
+        "retries and timeouts",
+        "cancellation and degradation",
+        "queues, buffers, and backpressure",
+        "resource-exhaustion concurrency",
+        "partial failure",
+        "repeated delivery",
+        "migrations",
+        "new runtime paths"
+      ]
+    }
+  },
+  {
+    "id": "design-engagement",
+    "engagement": {
+      "seam": "Design",
+      "artifact": "Candidate design section 3.4"
+    },
+    "expected": {
+      "citeCandidateSection": true,
+      "classifyDesignMaterial": true,
+      "overallReadinessResult": false
+    }
+  },
+  {
+    "id": "release-engagement",
+    "engagement": {
+      "seam": "Release",
+      "baseline": "merge-base plus specification"
+    },
+    "expected": {
+      "exactApplicationSourceEvidence": true,
+      "classifyAttribution": [
+        "Change-attributed",
+        "Ambient risk"
+      ],
+      "overallReadinessResult": false
+    }
+  }
+]
