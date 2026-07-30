@@ -1,0 +1,29 @@
+[
+  {
+    "id": "broad-design-readiness",
+    "input": {
+      "intent": "broad design-readiness"
+    },
+    "expected": {
+      "selectedCapability": "operational-design-review"
+    }
+  },
+  {
+    "id": "focused-infrastructure",
+    "input": {
+      "intent": "focused Infrastructure-readiness"
+    },
+    "expected": {
+      "selectedCapability": "infrastructure-readiness"
+    }
+  },
+  {
+    "id": "focused-application",
+    "input": {
+      "intent": "focused Application-resilience"
+    },
+    "expected": {
+      "selectedCapability": "application-resilience"
+    }
+  }
+]

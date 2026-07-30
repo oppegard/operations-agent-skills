@@ -1,0 +1,63 @@
+[
+  {
+    "id": "valid-design-blocker",
+    "candidate": {
+      "citation": "Section 4.2: Deploy in one step without a rollback signal.",
+      "state": "unresolved decision",
+      "proposalAttribution": "requires",
+      "necessaryForSafeProduction": true
+    },
+    "expected": {
+      "category": "Blocker",
+      "decision": "Define the rollback signal and stop condition."
+    }
+  },
+  {
+    "id": "pre-existing-debt",
+    "candidate": {
+      "citation": "Section 2.1: Existing alerts do not link to runbooks.",
+      "state": "constraint",
+      "proposalAttribution": "pre-existing",
+      "necessaryForSafeProduction": true
+    },
+    "expected": {
+      "category": "Advisory"
+    }
+  },
+  {
+    "id": "resolved-decision",
+    "candidate": {
+      "citation": "Section 5.3: Stop at 2% errors and roll back.",
+      "state": "resolved decision",
+      "proposalAttribution": "requires",
+      "necessaryForSafeProduction": true
+    },
+    "expected": {
+      "category": "Advisory"
+    }
+  },
+  {
+    "id": "not-production-safety",
+    "candidate": {
+      "citation": "Section 6.1: Dashboard colors remain undecided.",
+      "state": "unresolved decision",
+      "proposalAttribution": "requires",
+      "necessaryForSafeProduction": false
+    },
+    "expected": {
+      "category": "Advisory"
+    }
+  },
+  {
+    "id": "unattributed-question",
+    "candidate": {
+      "citation": "Section 1.4: Recovery ownership is unknown.",
+      "state": "open question",
+      "proposalAttribution": "not established",
+      "necessaryForSafeProduction": true
+    },
+    "expected": {
+      "category": "Advisory"
+    }
+  }
+]

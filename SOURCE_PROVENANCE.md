@@ -43,13 +43,16 @@ The following artifact groups originate in Operations Pack:
 | `skills/*/references/capability-boundary.md` | Portable v1 capability boundaries |
 | `skills/infrastructure-readiness/references/engagement-contract.md` | Portable Direct, Design-seam, and Release-seam contracts layered around the shared specialist behavior |
 | `skills/application-resilience/references/engagement-contract.md` | Portable Direct, Design-seam, and Release-seam contracts layered around the shared specialist behavior |
+| `skills/operational-design-review/` | Original Design-seam applicability, independent orchestration, engagement, blocker-attribution, synthesis, and stable Readiness-result contracts |
 | `test/public-pack.test.mjs` | Consumer-visible pack contract |
 | `test/runbook.test.mjs` and `test/fixtures/runbook/` | Deterministic public-boundary verification for the extracted runbook contract |
 | `test/infrastructure-readiness.test.mjs` and `test/fixtures/infrastructure-readiness/` | Deterministic routing, boundary, evidence, severity, and engagement verification for Infrastructure readiness |
 | `test/application-resilience.test.mjs` and `test/fixtures/application-resilience/` | Deterministic routing, boundary, evidence, protocol, severity, and engagement verification for Application resilience |
+| `test/operational-design-review.test.mjs` and `test/fixtures/operational-design-review/` | Deterministic public-boundary verification for Design routing, applicability, orchestration, attribution, synthesis, and result contracts |
 | `eval/manual/runbook.md` | Cross-host manual prompt corpus and expected observations |
 | `eval/manual/infrastructure-readiness.md` | Cross-host direct-selection, boundary, evidence, severity, and seam-engagement prompt corpus |
 | `eval/manual/application-resilience.md` | Cross-host direct-selection, source-boundary, evidence, protocol, severity-calibration, and seam-engagement prompt corpus |
+| `eval/manual/operational-design-review.md` | Cross-host Design routing, applicability, independence, blocker-calibration, disagreement, and rerun prompt corpus |
 | `README.md` | Whole-pack installation and verification guidance |
 | `.github/workflows/ci.yml` | Deterministic public-boundary CI entry point |
 

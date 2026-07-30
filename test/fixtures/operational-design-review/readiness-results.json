@@ -1,0 +1,114 @@
+[
+  {
+    "id": "not-applicable",
+    "reports": [],
+    "skipped": [
+      {
+        "perspective": "Infrastructure readiness",
+        "reason": "No Infrastructure-readiness signal"
+      },
+      {
+        "perspective": "Application resilience",
+        "reason": "No Application-resilience signal"
+      }
+    ],
+    "expected": {
+      "status": "NOT_APPLICABLE",
+      "nextAction": "Continue specification finalization."
+    }
+  },
+  {
+    "id": "ready",
+    "reports": [
+      {
+        "perspective": "Infrastructure readiness",
+        "blockers": [],
+        "advisories": []
+      }
+    ],
+    "expected": {
+      "status": "READY",
+      "nextAction": "Continue specification finalization."
+    }
+  },
+  {
+    "id": "advisory-only",
+    "reports": [
+      {
+        "perspective": "Application resilience",
+        "blockers": [],
+        "advisories": ["A pre-existing retry policy should be tracked."]
+      }
+    ],
+    "expected": {
+      "status": "READY_WITH_ADVISORIES",
+      "nextAction": "Record the advisory follow-up and continue specification finalization."
+    }
+  },
+  {
+    "id": "valid-blocker",
+    "reports": [
+      {
+        "perspective": "Infrastructure readiness",
+        "blockers": ["Define a rollback signal for section 4.2."],
+        "advisories": []
+      }
+    ],
+    "expected": {
+      "status": "BLOCKED",
+      "nextAction": "Resolve one decision, update the design, and rerun operational-design-review."
+    }
+  },
+  {
+    "id": "advisory-disagreement",
+    "reports": [
+      {
+        "perspective": "Infrastructure readiness",
+        "position": "Add a dashboard before launch.",
+        "citation": "Section 7.1"
+      },
+      {
+        "perspective": "Application resilience",
+        "position": "Existing request metrics are sufficient.",
+        "citation": "Section 7.1"
+      }
+    ],
+    "disagreement": {
+      "unresolved": true,
+      "criticalProductionSafety": false,
+      "proposalAttribution": "requires"
+    },
+    "expected": {
+      "status": "READY_WITH_ADVISORIES",
+      "category": "Advisory tension",
+      "preserveAttribution": true,
+      "nextAction": "Record the advisory follow-up and continue specification finalization."
+    }
+  },
+  {
+    "id": "critical-disagreement",
+    "reports": [
+      {
+        "perspective": "Infrastructure readiness",
+        "position": "The rollout needs an automatic stop signal.",
+        "citation": "Section 4.2"
+      },
+      {
+        "perspective": "Application resilience",
+        "position": "The application-level error budget is sufficient.",
+        "citation": "Section 4.2"
+      }
+    ],
+    "disagreement": {
+      "unresolved": true,
+      "criticalProductionSafety": true,
+      "proposalAttribution": "requires"
+    },
+    "expected": {
+      "status": "BLOCKED",
+      "category": "Blocker",
+      "preserveAttribution": true,
+      "nextAction": "Resolve one decision, update the design, and rerun operational-design-review."
+    }
+  }
+]

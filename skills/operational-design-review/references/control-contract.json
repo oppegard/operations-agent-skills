@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "routing": {
+    "broad design-readiness": "operational-design-review",
+    "focused Infrastructure-readiness": "infrastructure-readiness",
+    "focused Application-resilience": "application-resilience"
+  },
+  "applicability": {
+    "notApplicableStatus": "NOT_APPLICABLE",
+    "infrastructure": {
+      "perspective": "Infrastructure readiness",
+      "skill": "infrastructure-readiness",
+      "signals": [
+        "containers",
+        "deployment manifests",
+        "infrastructure as code",
+        "CI/CD",
+        "rollout behavior",
+        "observability",
+        "alert configuration",
+        "feature flags",
+        "operational controls"
+      ],
+      "skipReason": "No Infrastructure-readiness signal"
+    },
+    "application": {
+      "perspective": "Application resilience",
+      "skill": "application-resilience",
+      "sourceArtifact": "production application source",
+      "sourceSignals": [
+        "remote calls",
+        "dependencies",
+        "latency",
+        "timeouts",
+        "cancellation",
+        "retries",
+        "degradation",
+        "queues",
+        "buffers",
+        "backpressure",
+        "concurrency",
+        "error paths",
+        "fan-out",
+        "partial failure",
+        "idempotency",
+        "repeated delivery",
+        "co-deployed schema migrations"
+      ],
+      "independentSignals": [
+        "new production runtime path"
+      ],
+      "excludedArtifacts": [
+        "documentation",
+        "generated files",
+        "pure configuration",
+        "infrastructure",
+        "infrastructure as code",
+        "deployment manifest",
+        "pipelines",
+        "observability-platform artifacts"
+      ],
+      "boundarySkipReason": "Application-source boundary",
+      "noSignalSkipReason": "No Application-resilience signal"
+    }
+  },
+  "orchestration": {
+    "concurrentCapability": "independent subagents",
+    "concurrentExecution": "concurrent",
+    "fallbackExecution": "sequential",
+    "stoppedOutcome": "ORCHESTRATION_STOPPED",
+    "inputIdentity": "same candidate design",
+    "wholePackRemedies": {
+      "codex": "npx skills add oppegard/operations-agent-skills#v1.0.0 --skill '*' --agent codex",
+      "claude-code": "npx skills add oppegard/operations-agent-skills#v1.0.0 --skill '*' --agent claude-code"
+    }
+  },
+  "designBlocker": {
+    "citationField": "citation",
+    "stateField": "state",
+    "unresolvedStates": [
+      "unresolved decision",
+      "open question"
+    ],
+    "proposalAttributionField": "proposalAttribution",
+    "proposalAttributions": [
+      "requires",
+      "worsens",
+      "newly depends on"
+    ],
+    "safeProductionField": "necessaryForSafeProduction",
+    "blockingCategory": "Blocker",
+    "advisoryCategory": "Advisory"
+  },
+  "readiness": {
+    "statuses": {
+      "notApplicable": "NOT_APPLICABLE",
+      "ready": "READY",
+      "advisory": "READY_WITH_ADVISORIES",
+      "blocked": "BLOCKED"
+    },
+    "disagreementCategories": {
+      "critical": "Blocker",
+      "nonCritical": "Advisory tension"
+    },
+    "nextActions": {
+      "NOT_APPLICABLE": "Continue specification finalization.",
+      "READY": "Continue specification finalization.",
+      "READY_WITH_ADVISORIES": "Record the advisory follow-up and continue specification finalization.",
+      "BLOCKED": "Resolve one decision, update the design, and rerun operational-design-review."
+    }
+  }
+}
