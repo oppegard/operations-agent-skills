@@ -43,17 +43,18 @@ Integration Policy.
 
 ## Verify
 
-The deterministic public-boundary suite uses the pinned Skills CLI to perform
-a real local consumer installation and validate the repository contract:
+Install the locked development toolchain, then run the same verification task
+used by CI:
 
 ```sh
-npm ci
-npm test
+mise run ci
 ```
 
-The suite checks the exact inventory, discovery metadata, invocation controls,
-bundled references, instruction-file isolation, package documentation,
-licensing, and source provenance. It makes no live model calls.
+The deterministic public-boundary suite uses the pinned Skills CLI to perform
+a real local consumer installation. It checks the exact inventory, discovery
+metadata, invocation controls, bundled references, instruction-file isolation,
+package documentation, licensing, and source provenance. It makes no live
+model calls.
 
 Manual prompt cases under [`eval/manual/`](eval/manual/) supplement the
 deterministic suite. Run them in each supported host as release evidence; they

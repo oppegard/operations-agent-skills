@@ -1,0 +1,28 @@
+min_version = { hard = "2026.7.17" }
+
+[settings]
+lockfile = true
+lockfile_platforms = ["linux-x64", "macos-arm64"]
+
+[tools]
+node = "22.20.0"
+
+[tasks.bootstrap]
+description = "Install locked Node dependencies"
+run = "npm ci"
+
+[tasks.test]
+description = "Run the deterministic public contract suite"
+run = "npm test"
+
+[tasks."mise:check"]
+description = "Validate the mise configuration"
+run = ["mise fmt --check", "mise tasks validate --errors-only"]
+
+[tasks.check]
+description = "Run all repository checks"
+depends = ["mise:check", "test"]
+
+[tasks.ci]
+description = "Bootstrap and run all repository checks"
+run = [{ task = "bootstrap" }, { task = "check" }]
