@@ -1,0 +1,69 @@
+[
+  {
+    "id": "creation",
+    "mode": "create",
+    "input": {
+      "origin": "incident-notes.md",
+      "existingConvention": null
+    },
+    "expected": {
+      "output": "created.md",
+      "lastValidated": "Not yet validated"
+    }
+  },
+  {
+    "id": "update",
+    "mode": "update",
+    "input": {
+      "artifactCase": "creation",
+      "change": "Add the database escalation condition.",
+      "exercisedEndToEnd": false
+    },
+    "expected": {
+      "sameArtifact": true,
+      "lastValidatedChanged": false,
+      "changes": [
+        {
+          "from": "- **Last edited:** 2026-07-30",
+          "to": "- **Last edited:** 2026-07-31"
+        },
+        {
+          "from": "2. **If jobs do not complete within 10 minutes:** contact the Database on-call in Slack `#incident-checkout`.",
+          "to": "2. **If jobs do not complete within 10 minutes:** contact the Database on-call in Slack `#incident-checkout`.\n3. **If the database reports connection saturation:** page the Database incident commander through PagerDuty service `database-primary`."
+        },
+        {
+          "from": "## Change history\n\n- **2026-07-30**",
+          "to": "## Change history\n\n- **2026-07-31** - Alex Operator: Added the database escalation condition from incident follow-up INC-142 [validated: no - editorial update only]\n- **2026-07-30**"
+        }
+      ]
+    }
+  },
+  {
+    "id": "validation",
+    "mode": "validate",
+    "input": {
+      "artifactCase": "update",
+      "exercisedEndToEnd": true,
+      "environment": "faithful staging",
+      "validatingParty": "Sam Exerciser"
+    },
+    "expected": {
+      "sameArtifact": true,
+      "lastValidated": "2026-08-01 by Sam Exerciser",
+      "changes": [
+        {
+          "from": "- **Last validated:** Not yet validated",
+          "to": "- **Last validated:** 2026-08-01 by Sam Exerciser"
+        },
+        {
+          "from": "- **Last edited:** 2026-07-31",
+          "to": "- **Last edited:** 2026-08-01"
+        },
+        {
+          "from": "## Change history\n\n- **2026-07-31**",
+          "to": "## Change history\n\n- **2026-08-01** - Sam Exerciser: Exercised the procedure end to end in faithful staging [validated: yes]\n- **2026-07-31**"
+        }
+      ]
+    }
+  }
+]

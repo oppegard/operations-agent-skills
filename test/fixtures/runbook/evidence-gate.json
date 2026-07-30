@@ -1,0 +1,35 @@
+[
+  {
+    "id": "evidence-gate-refusal",
+    "mode": "create",
+    "input": {
+      "scenario": "Write a runbook in case an alert is added someday.",
+      "origin": null,
+      "humanOverride": null
+    },
+    "expected": {
+      "outcome": "refuse",
+      "writes": [],
+      "revisitWhen": "The alert exists and fires for the first time."
+    }
+  },
+  {
+    "id": "human-override",
+    "mode": "create",
+    "input": {
+      "scenario": "Document the preventive procedure before the first event.",
+      "origin": null,
+      "humanOverride": {
+        "date": "2026-07-30",
+        "reason": "I want a preventive rehearsal document even though no operational trigger exists."
+      }
+    },
+    "expected": {
+      "outcome": "proceed",
+      "writes": [
+        "one runbook"
+      ],
+      "origin": "override: written preventively at human request on 2026-07-30 - I want a preventive rehearsal document even though no operational trigger exists."
+    }
+  }
+]

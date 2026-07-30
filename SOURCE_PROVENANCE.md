@@ -13,14 +13,19 @@ adaptation.
 
 ## Adapted upstream work
 
-Issue #2 introduces the installable pack boundary but does not yet introduce
-adapted Han content. The faithful extractions scheduled for the `runbook`,
-`infrastructure-readiness`, and `application-resilience` capability directories
-must add file-by-file mappings here when they land.
+Every upstream path in this table refers to the pinned Han revision above.
+The Operations Pack keeps Han's substantive behavior while replacing
+plugin-qualified agents, Claude-specific tool declarations, and dynamic command
+injection with host-neutral skill instructions.
 
 | Operations Pack artifact | Upstream artifact | Adaptation |
 | --- | --- | --- |
-| None in the installable-pack contract | — | — |
+| `skills/runbook/SKILL.md` | `han-core/skills/runbook/SKILL.md` | Preserves explicit intent, the one-runbook boundary, modes, and progressive reference loading behind the stable public capability. |
+| `skills/runbook/references/authoring-workflow.md` | `han-core/skills/runbook/SKILL.md` | Extracts create, update, validate, project-discovery, integration, and validation behavior without host-specific tools or registered agents. |
+| `skills/runbook/references/evidence-gate.md` | `han-core/skills/runbook/SKILL.md`; `han-core/references/yagni-rule.md`; `han-core/references/evidence-rule.md` | Preserves the evidence-based YAGNI decision, trust classes, explicit deferral, revisit trigger, and recorded human override in a runbook-specific reference. |
+| `skills/runbook/references/runbook-template.md` | `han-core/skills/runbook/references/runbook-template.md` | Preserves the procedural metadata, action and expected-result pairing, verification, escalation, rollback, live links, optional-section rules, and change history with host-neutral wording. |
+| `skills/runbook/references/quality-check.md` | `han-core/skills/runbook/SKILL.md`; `han-core/references/readability-rule.md`; `han-core/references/writing-voice.md` | Extracts the final completeness and readability checks, including the rule that editing must preserve every factual condition. |
+| `skills/runbook/references/writing-blocklist.md` | `han-core/references/readability-rule.md`; `han-core/references/writing-voice.md` | Preserves the complete vocabulary blocklist used by Han's runbook readability self-check. |
 
 ## Original Operations Pack work
 
@@ -28,9 +33,11 @@ The following artifact groups originate in Operations Pack:
 
 | Artifact | Purpose |
 | --- | --- |
-| `skills/*/SKILL.md` | Stable public capability names, discovery metadata, and invocation boundaries |
+| `skills/*/SKILL.md` except `skills/runbook/SKILL.md` | Stable public capability names, discovery metadata, and invocation boundaries not yet adapted from Han |
 | `skills/*/references/capability-boundary.md` | Portable v1 capability boundaries |
 | `test/public-pack.test.mjs` | Consumer-visible pack contract |
+| `test/runbook.test.mjs` and `test/fixtures/runbook/` | Deterministic public-boundary verification for the extracted runbook contract |
+| `eval/manual/runbook.md` | Cross-host manual prompt corpus and expected observations |
 | `README.md` | Whole-pack installation and verification guidance |
 | `.github/workflows/ci.yml` | Deterministic public-boundary CI entry point |
 

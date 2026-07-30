@@ -55,6 +55,10 @@ The suite checks the exact inventory, discovery metadata, invocation controls,
 bundled references, instruction-file isolation, package documentation,
 licensing, and source provenance. It makes no live model calls.
 
+Manual prompt cases under [`eval/manual/`](eval/manual/) supplement the
+deterministic suite. Run them in each supported host as release evidence; they
+are not a CI gate.
+
 ## License and provenance
 
 Operations Pack is available under the [MIT License](LICENSE). Adapted source
